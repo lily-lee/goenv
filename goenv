@@ -43,8 +43,8 @@ if [[ "$GOROOT" != "$basePath"/go ]]; then
     fi
 
     goroot="$basePath"/go
-    echo GOROOT="$goroot" >> "$profilename"
-    echo PATH="$goroot/bin:$PATH" >> "$profilename"
+    echo 'export GOROOT="$HOME/sdk/go"' >> "$profilename"
+    echo 'export PATH="$GOROOT/bin:$PATH"' >> "$profilename"
 fi
 
 function throughWget() {
