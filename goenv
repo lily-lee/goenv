@@ -1,5 +1,21 @@
 #!/usr/bin/env bash
 
+
+profilename="$HOME"/.zprofile
+if ! [[ -f "$profilename" ]]; then
+    profilename="$HOME"/.zshrc
+fi
+
+if ! [[ "$SHELL" == "/bin/zsh" ]]; then
+    echo $SHELL
+    profilename="$HOME"/.bash_profile
+    if ! [[ -f "$profilename" ]]; then
+        profilename="$HOME"/.bashrc
+    fi
+fi
+
+source "$profilename"
+
 function help() {
     echo "
     goenv, manage your go version.
@@ -34,14 +50,7 @@ fi
 
 basename=go"$2"."$osversion".tar.gz
 
-
 if [[ "$GOROOT" != "$basePath"/go ]]; then
-    profilename="$HOME"/.zprofile
-    if ! [[ "$SHELL" == "/bin/zsh" ]]; then
-        echo $SHELL
-        profilename="$HOME"/.bash_profile
-    fi
-
     goroot="$basePath"/go
     echo 'export GOROOT="$HOME/sdk/go"' >> "$profilename"
     echo 'export PATH="$GOROOT/bin:$PATH"' >> "$profilename"
