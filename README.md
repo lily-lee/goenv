@@ -5,11 +5,10 @@ A simple tool to manage local go version.
 ## Install
 
 ```
-$ git clone https://github.com/lily-lee/goenv.git ~/.goenv
-
-$ echo 'export PATH=$PATH:~/.goenv' >> ~/.zprofile // or .bashrc, .bash_profile etc.
-
-$ source ~/.zprofile
+$ git clone https://github.com/lily-lee/goenv.git
+$ cd goenv
+$ make install
+ 
 ```
 
 
