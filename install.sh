@@ -1,21 +1,25 @@
 #!/usr/bin/env bash
 
-a="${SHELL##*/}"
+shell_type="${SHELL##*/}"
 
-sed "1s/bash/$a/" "src/goenv" > "bin/goenv"
+if ! [[ -d "bin" ]]; then
+  mkdir "bin"
+fi
+
+sed "1s/bash/$shell_type/" "src/goenv" > "bin/goenv"
 
 chmod a+x "bin/goenv"
 
-profilename="$HOME"/.zprofile
-if ! [[ -f "$profilename" ]]; then
-    profilename="$HOME"/.zshrc
+profile_name="$HOME"/.zprofile
+if ! [[ -f "$profile_name" ]]; then
+    profile_name="$HOME"/.zshrc
 fi
 
 if ! [[ "$SHELL" == "/bin/zsh" ]]; then
-    echo $SHELL
-    profilename="$HOME"/.bash_profile
-    if ! [[ -f "$profilename" ]]; then
-        profilename="$HOME"/.bashrc
+    echo "$SHELL"
+    profile_name="$HOME"/.bash_profile
+    if ! [[ -f "$profile_name" ]]; then
+        profile_name="$HOME"/.bashrc
     fi
 fi
 
