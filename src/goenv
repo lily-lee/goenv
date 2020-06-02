@@ -1,84 +1,98 @@
 #!/usr/bin/env bash
 
 
-profilename="$HOME"/.zprofile
-if ! [[ -f "$profilename" ]]; then
-    profilename="$HOME"/.zshrc
+profile_name="$HOME"/.zprofile
+if ! [[ -f "$profile_name" ]]; then
+    profile_name="$HOME"/.zshrc
 fi
 
 if ! [[ "$SHELL" == "/bin/zsh" ]]; then
     echo $SHELL
-    profilename="$HOME"/.bash_profile
-    if ! [[ -f "$profilename" ]]; then
-        profilename="$HOME"/.bashrc
+    profile_name="$HOME"/.bash_profile
+    if ! [[ -f "$profile_name" ]]; then
+        profile_name="$HOME"/.bashrc
     fi
 fi
 
-source "$profilename"
+source "$profile_name"
 
-function help() {
-    echo "
-    goenv, manage your go version.
+function cmd_help() {
+    echo "goenv is a tool for you to manage your go version.
+
+Usage:
 
     goenv [commands] [versions]
 
-    [commands]
-        remote      list golang versions from golang.org.
-        list        list local go versions.
-        install     install a certain go. eg: goenv install 1.11.5.
-        use         change local go version. eg: goenv use 1.11.5.
-        current     show current go version.
-        version     show goenv version.
-        help        show help.
-    "
+The commands are:
+
+    remote      list golang versions from golang.org.
+    list        list local go versions.
+    install     install a certain go. eg: goenv install 1.11.5.
+    use         change local go version. eg: goenv use 1.11.5.
+    current     show current go version.
+    version     show goenv version.
+    help        show help.
+"
 }
 
 if [[ "$1" == "" ]]; then
-    help $@
+    cmd_help $@
     exit 0
 fi
 
 dirname=sdk
-basePath="$HOME"/"$dirname"
+base_path="$HOME"/"$dirname"
 
-osname=$(uname -a)
-osversion=darwin-amd64
+os_name=$(uname -a)
+os_version=darwin-amd64
 
-if [[ "$osname" == "Linux" ]]; then
-    osversion=linux-amd64
+if [[ "$os_name" == "Linux" ]]; then
+    os_version=linux-amd64
 fi
 
-basename=go"$2"."$osversion".tar.gz
+go_version=go"$2"
 
-if [[ "$GOROOT" != "$basePath"/go ]]; then
-    goroot="$basePath"/go
-    echo 'export GOROOT="$HOME/sdk/go"' >> "$profilename"
-    echo 'export PATH="$GOROOT/bin:$PATH"' >> "$profilename"
+function get_version() {
+    if [[ "$2" == "" ]]; then
+        return
+    fi
+
+    if [[ ${2:0:2} == "go" ]]; then
+        go_version=$2
+    fi
+}
+
+get_version $@
+
+basename="$go_version"."$os_version".tar.gz
+
+if [[ "$GOROOT" != "$base_path"/go ]]; then
+    echo 'export GOROOT="$HOME/sdk/go"' >> "$profile_name"
+    echo 'export PATH="$GOROOT/bin:$PATH"' >> "$profile_name"
 fi
 
-function throughWget() {
+function through_wget() {
     rm "$HOME"/pkg/"$basename"*
-    wget https://dl.google.com/go/"$basename" -P "$basePath"
-    go get golang.org/dl/go"$2"
-    mkdir "$basePath"/go"$2"
-    tar zxvf "$basePath"/"$basename" "$basePath"/go"$2"
-    rm "$basePath"/"$basename"
+    wget https://dl.google.com/go/"$basename" -P "$base_path"
+    go get golang.org/dl/"$go_version"
+    mkdir "$base_path"/"$go_version"
+    tar zxvf "$base_path"/"$basename" "$base_path"/"$go_version"
+    rm "$base_path"/"$basename"
 }
 
-function listVersion() {
-    curl https://golang.org/dl/ > "$basePath"/golang.org.dl.html
-    goversions=$(grep 'id="go[0-9].*"' "$basePath"/golang.org.dl.html | awk -F '[ "]' '{printf "    %s\n", $6}')
-    echo "$goversions"
+function through_go() {
+    go get golang.org/dl/"$go_version"
+    eval "$go_version" download
 }
 
-function throughGo() {
-    # todo if go not exists
-    go get golang.org/dl/go"$2"
-    go"$2" download
+function list_version() {
+    curl https://golang.org/dl/ > "$base_path"/golang.org.dl.html
+    go_versions=$(grep 'id="go[0-9].*"' "$base_path"/golang.org.dl.html | awk -F '[ "]' '{printf "    %s\n", $6}')
+    echo "$go_versions"
 }
 
-function readPkgDir() {
-    for file in "$basePath"/*
+function read_pkg_dir() {
+    for file in "$base_path"/*
     do
         if test -d "$file"
         then
@@ -87,63 +101,64 @@ function readPkgDir() {
     done
 }
 
-function readPkg() {
+function read_pkg() {
     pkgExists=$(ls -l $HOME | awk '{print $9}' | grep "^$dirname$")
     if [[ "$pkgExists" == "" ]]; then
-        mkdir "$basePath"
+        mkdir "$base_path"
     fi
 
-    exists=$(ls -l "$basePath" | grep '^l' | awk '{print $11}')
+    exists=$(ls -l "$base_path" | grep '^l' | awk '{print $11}')
     if [[ "$exists" == ""  ]]; then
-        ls -l "$basePath" | grep '^d' | awk '{print $9}'
+        ls -l "$base_path" | grep '^d' | awk '{print $9}'
     else
-        ls -l "$basePath" | grep '^l' | awk '{print $9 $10 $11}'
+        ls -l "$base_path" | grep '^l' | awk '{print $9 $10 $11}'
 
         # printf "    %s\n" $(ls -l "$basePath" | grep '^d' | grep -v "$exists" | awk '{print $9}')
-        printf "    %s\n" $(ls -l "$basePath" | grep '^d' | awk '{print $9}')
+        printf "    %s\n" $(ls -l "$base_path" | grep '^d' | awk '{print $9}')
     fi
 }
 
 # read go path
-function readGopath() {
+function read_GOPATH() {
     ls ${GOPATH%%:*}/bin | grep 'go[0-9]'
 }
 
-function command() {
+function cmd() {
     # remote
     if [[ "$1" == "remote" ]]; then
-        listVersion
+        list_version
     fi
 
     # list
     if [[ "$1" == "list" ]]; then
-        readPkg
+        read_pkg
     fi
 
     # install
     if [[ "$1" == "install" ]]; then
+        echo "install $go_version ..."
+
         if [[ "$2" == "" ]];then
-            echo "go version shouldn't be null"
+            echo -e "\033[31m[ERR] go version shouldn't be null !\n\033[0m"
+            cmd_help
             return
         fi
 
         if type go >/dev/null 2>&1; then
             export GO111MODULE=off
             export GOPROXY=https://goproxy.cn
-            throughGo $@
+            through_go $@
         else
-            throughWget $@
+            through_wget $@
         fi
-
-
     fi
 
     # use
     if [[ "$1" == "use" ]]; then
-        cd "$basePath"
+        cd "$base_path"
 
-        if ! [[ -d go"$2" ]]; then
-            echo "go$2 not exists"
+        if ! [[ -d "$go_version" ]]; then
+            echo -e "\033[31m[ERR] $go_version not exists.\n\033[0m"
             return
         fi
 
@@ -152,7 +167,7 @@ function command() {
            rm go
         fi
 
-        ln -s go"$2" go
+        ln -s "$go_version" go
     fi
 
     # current
@@ -162,15 +177,15 @@ function command() {
 
     # version
     if [[ "$1" == "version" ]]; then
-        echo goenv 1.0.0
+        echo goenv 1.0.1
     fi
 
     # help
     if [[ "$1" == "help" ]]; then
-        help
+        cmd_help
     fi
 }
 
 
 
-command $@
+cmd $@
