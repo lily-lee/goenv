@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 profile_name="$HOME"/.zprofile
 if ! [[ -f "$profile_name" ]]; then
     profile_name="$HOME"/.zshrc
@@ -72,6 +71,11 @@ if [[ "$GOROOT" != "$base_path"/go ]]; then
 fi
 
 function through_wget() {
+    if ! type wget >/dev/null 2>&1; then
+        echo -e "\033[31m[ERR] wget not exists. please install wget first !\n\033[0m"
+        return
+    fi
+
     rm "$base_path"/"$go_version."*
     wget https://dl.google.com/go/"$basename" -P "$base_path"
     if [[ -d  "$base_path"/"$go_version" ]]; then
