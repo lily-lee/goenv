@@ -72,7 +72,6 @@ if [[ "$GOROOT" != "$base_path"/go ]]; then
 fi
 
 function through_wget() {
-    echo "$base_path"/"$go_version."*
     rm "$base_path"/"$go_version."*
     wget https://dl.google.com/go/"$basename" -P "$base_path"
     if [[ -d  "$base_path"/"$go_version" ]]; then
