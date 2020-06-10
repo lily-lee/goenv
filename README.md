@@ -15,11 +15,14 @@ $ make install
 ## Usage
 
 ```
-goenv, manage your go version.
+goenv is a tool for you to manage your go version.
 
-goenv [commands] [versions]
+Usage:
 
-[commands]
+    goenv [commands] [version]
+
+The commands are:
+
     remote      list golang versions from golang.org.
     list        list local go versions.
     install     install a certain go. eg: goenv install 1.11.5.
@@ -27,5 +30,4 @@ goenv [commands] [versions]
     current     show current go version.
     version     show goenv version.
     help        show help.
-
 ```

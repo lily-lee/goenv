@@ -21,7 +21,7 @@ function cmd_help() {
 
 Usage:
 
-    goenv [commands] [versions]
+    goenv [commands] [version]
 
 The commands are:
 
@@ -72,11 +72,21 @@ if [[ "$GOROOT" != "$base_path"/go ]]; then
 fi
 
 function through_wget() {
-    rm "$HOME"/pkg/"$basename"*
+    echo "$base_path"/"$go_version."*
+    rm "$base_path"/"$go_version."*
     wget https://dl.google.com/go/"$basename" -P "$base_path"
-    go get golang.org/dl/"$go_version"
+    if [[ -d  "$base_path"/"$go_version" ]]; then
+      rm -r "$base_path"/"$go_version"
+    fi
     mkdir "$base_path"/"$go_version"
-    tar zxvf "$base_path"/"$basename" "$base_path"/"$go_version"
+
+    if [[ -d  "/tmp/$go_version" ]]; then
+      rm -r "/tmp/$go_version"
+    fi
+    mkdir "/tmp/$go_version"
+
+    tar zxvf "$base_path"/"$basename" -C "/tmp/$go_version"
+    mv "/tmp/$go_version/go"/* "$base_path"/"$go_version/"
     rm "$base_path"/"$basename"
 }
 
@@ -177,7 +187,7 @@ function cmd() {
 
     # version
     if [[ "$1" == "version" ]]; then
-        echo goenv 1.0.1
+        echo goenv 1.0.2
     fi
 
     # help
