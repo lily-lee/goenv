@@ -31,3 +31,7 @@ The commands are:
     version     show goenv version.
     help        show help.
 ```
+
+## NOTE
+
+If you had installed go before, please make sure you had added your $GOPATH/bin to your $PATH.
