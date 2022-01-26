@@ -99,7 +99,7 @@ function through_go() {
 }
 
 function list_version() {
-    curl https://golang.org/dl/ > "$base_path"/golang.org.dl.html
+    curl https://go.dev/dl/ > "$base_path"/golang.org.dl.html
     go_versions=$(grep 'id="go[0-9].*"' "$base_path"/golang.org.dl.html | awk -F '[ "]' '{printf "    %s\n", $6}')
     echo "$go_versions"
 }
