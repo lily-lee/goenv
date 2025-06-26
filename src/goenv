@@ -42,7 +42,7 @@ fi
 dirname=sdk
 base_path="$HOME"/"$dirname"
 
-os_name=$(uname -a)
+os_name=$(uname)
 os_version=darwin-amd64
 
 if [[ "$os_name" == "Linux" ]]; then
@@ -77,7 +77,7 @@ function through_wget() {
     fi
 
     rm "$base_path"/"$go_version."*
-    wget https://dl.google.com/go/"$basename" -P "$base_path"
+    wget https://go.dev/dl/"$basename" -P "$base_path"
     if [[ -d  "$base_path"/"$go_version" ]]; then
       rm -r "$base_path"/"$go_version"
     fi
@@ -94,11 +94,12 @@ function through_wget() {
 }
 
 function through_go() {
-    go get golang.org/dl/"$go_version"
+    go install golang.org/dl/"$go_version"@latest
     eval "$go_version" download
 }
 
 function list_version() {
+    rm -f "$base_path"/golang.org.dl.html
     curl https://go.dev/dl/ > "$base_path"/golang.org.dl.html
     go_versions=$(grep 'id="go[0-9].*"' "$base_path"/golang.org.dl.html | awk -F '[ "]' '{printf "    %s\n", $6}')
     echo "$go_versions"
@@ -115,8 +116,7 @@ function read_pkg_dir() {
 }
 
 function read_pkg() {
-    pkgExists=$(ls -l $HOME | awk '{print $9}' | grep "^$dirname$")
-    if [[ "$pkgExists" == "" ]]; then
+    if [ ! -d "$base_path" ]; then
         mkdir "$base_path"
     fi
 
@@ -158,7 +158,7 @@ function cmd() {
         fi
 
         if type go >/dev/null 2>&1; then
-            export GO111MODULE=off
+            export GO111MODULE=on
             export GOPROXY=https://goproxy.cn
             through_go $@
         else
@@ -190,7 +190,7 @@ function cmd() {
 
     # version
     if [[ "$1" == "version" ]]; then
-        echo goenv 1.0.2
+        echo goenv 1.0.3
     fi
 
     # help
